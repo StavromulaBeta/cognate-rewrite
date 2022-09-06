@@ -688,12 +688,12 @@ void to_c(module_t* mod)
 		if (!func->func->generic) for (word_list_t* w = func->func->captures ; w ; w = w->next)
 		{
 			fprintf(c_source, "%s", c_val_type(w->word->val->type));
-			if (w->next || func->func->argc) fprintf(c_source, ",");
+			if (w->next || func->func->argc) fprintf(c_source, ", ");
 		}
 		else
 		{
 			fprintf(c_source, "void* env[%zu]", num_words);
-			if (func->func->argc) fprintf(c_source, ",");
+			if (func->func->argc) fprintf(c_source, ", ");
 		}
 		reg_dequeue_t* ar = make_register_dequeue();
 		for (val_list_t* v = func->func->args ; v ; v = v->next)
@@ -750,12 +750,12 @@ void to_c(module_t* mod)
 				fprintf(c_source, "%s %s",
 						c_val_type(w->word->val->type),
 						c_word_name(w->word));
-				if (w->next || func->func->argc) fprintf(c_source, ",");
+				if (w->next || func->func->argc) fprintf(c_source, ", ");
 			}
 		else
 		{
 			fprintf(c_source, "void* env[%zu]", num_words);
-			if (func->func->argc) fprintf(c_source, ",");
+			if (func->func->argc) fprintf(c_source, ", ");
 		}
 		reg_dequeue_t* ar = make_register_dequeue();
 		for (val_list_t* v = func->func->args ; v ; v = v->next)
