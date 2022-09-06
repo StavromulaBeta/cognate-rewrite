@@ -129,6 +129,7 @@ bool consistent(func_t* f1, func_t* f2)
 	// TODO different types can be handled if we generate adaptor functions but effort
 	if (f1->argc != f2->argc || f1->returns != f2->returns) return false;
 	if (f1->returns && f1->rettype != f2->rettype) return false;
+	if (f1->stack != f2->stack) return false;
 	for (val_list_t *v1 = f1->args, *v2 = f2->args ; v1 ; v1 = v1->next, v2 = v2->next)
 	{
 		if (v1->val->type != v2->val->type) return false;
@@ -1060,6 +1061,11 @@ void add_noargs(module_t* mod)
 		if (f->func == mod->entry || f->func->generic || f->func->noargs)
 		{
 			f->func->noargs_variant = NULL;
+			continue;
+		}
+		else if (f->func->argc == 0 && f->func->returns == false)
+		{
+			f->func->noargs_variant = f->func;
 			continue;
 		}
 		ast_list_t* tree = malloc(sizeof *tree);
