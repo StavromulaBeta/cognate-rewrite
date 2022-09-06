@@ -2721,7 +2721,6 @@ int main(int argc, char** argv)
 		add_noargs,
 		compute_stack,
 		add_registers,
-		compute_stack,
 		shorten_references,
 		inline_values,
 		compute_variables,
