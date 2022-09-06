@@ -1936,10 +1936,7 @@ void compute_sources(module_t* m)
 
 void _inline_functions(ast_list_t* a, func_list_t** funcs)
 {
-	bool changed = 1;
-	// We do a limited number of inlining passes
-	// else code size can grow exponentially
-	while (changed)
+	for (bool changed = 1 ; changed ;)
 	{
 		changed = 0;
 		_compute_sources(a);
