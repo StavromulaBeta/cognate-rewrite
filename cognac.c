@@ -1123,7 +1123,6 @@ bool _add_arguments(func_t* f)
 {
 	if (f->has_args) return 0;
 	f->has_args = true;
-	printf("ADD ARGS TO %s\n", f->name);
 	bool changed = 0;
 	size_t registers = 0;
 	bool can_use_args = 1;
@@ -1132,13 +1131,24 @@ bool _add_arguments(func_t* f)
 		ast_t* op = n->op;
 		switch(op->type)
 		{
+			case ret:
+				/*
+				 * TODO TODO TODO
+				 * This almost seems to work for some reason
+				 * Never remove arguments but allow removing the returns
+				 * each pass?!?!?!?
+				 * What is this madness?
+				 */
+				remove_op(n);
+				f->returns = false;
+				break;
 			case closure:
 				changed |= _add_arguments(op->func);
 				registers++;
 				break;
+			case load:
 			case literal:
 			case var:
-			case load:
 				registers++;
 				break;
 			case fn_branch:
@@ -1199,7 +1209,6 @@ bool _add_arguments(func_t* f)
 			case call:
 				{
 					func_t* fn = call_to_func(op);
-					printf("CALL TO %s with %zu args and return:%i\n", fn->name, fn->argc, fn->returns);
 					if (fn->stack)
 					{
 						for (size_t i = registers; i > (size_t)fn->argc ; --i)
@@ -1222,7 +1231,6 @@ bool _add_arguments(func_t* f)
 					break;
 				}
 			case bind:
-			case ret:
 				if (registers) registers--;
 				else if (can_use_args && f->argc < 255 && !f->entry)
 				{
@@ -1238,11 +1246,10 @@ bool _add_arguments(func_t* f)
 		}
 		if (!n->next && registers && !f->entry)
 		{
-			printf("ADDING RETURN TO %s (%zu)\n", f->name, registers);
 			insert_op_before(make_op(ret, NULL), n);
 			f->returns = true;
 			f->rettype = any;
-			changed = true;
+			//changed = true;
 		}
 	}
 	f->args = reverse(f->args);
@@ -1254,7 +1261,6 @@ void add_arguments(module_t* mod)
 	bool changed = true;
 	while (changed)
 	{
-		puts("BEGIN");
 		for (func_list_t* f = mod->funcs ; f ; f = f->next)
 			f->func->has_args = false;
 		changed = false;
@@ -2140,19 +2146,32 @@ bool _compute_stack(func_t* f)
 			case static_call:
 				{
 					func_t* called = call_to_func(a->op);
-					if (_compute_stack(called)) return true;
+					if (_compute_stack(called))
+					{
+						f->stack = true;
+						return true;
+					}
 				}
 				break;
 			case fn_branch:
 				{
 					func_t* called = virtual_choose_func(a->op->funcs);
-					if (called->stack) return true;
+					if (called->stack)
+					{
+						f->stack = true;
+						return true;
+					}
 					for (func_list_t* F = a->op->funcs ; F ; F = F->next)
-						if (_compute_stack(F->func)) return true;
+						if (_compute_stack(F->func))
+						{
+							f->stack = true;
+							return true;
+						}
 				}
 				break;
 			case push:
 			case pop:
+				f->stack = true;
 				return true;
 		}
 	}
@@ -2164,7 +2183,7 @@ void compute_stack(module_t* m)
 	for (func_list_t* f = m->funcs ; f ; f = f->next)
 		f->func->stack = false, f->func->has_stack = false;
 	for (func_list_t* f = m->funcs ; f ; f = f->next)
-		f->func->stack = _compute_stack(f->func);
+		_compute_stack(f->func);
 }
 
 void compute_captures(func_t* f, word_list_t** ret, word_list_t** locals, func_list_t** tried)
@@ -2714,7 +2733,6 @@ int main(int argc, char** argv)
 		compute_sources,
 		static_branches,
 		compute_sources,
-		compute_stack,
 		static_calls,
 		add_arguments,
 		add_generics,
@@ -2729,7 +2747,6 @@ int main(int argc, char** argv)
 		add_var_types,
 		add_typechecks,
 		merge_symbols,
-		print_funcs,
 		to_c,
 		to_exe
 	};
