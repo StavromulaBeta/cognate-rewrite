@@ -675,10 +675,12 @@ void to_c(module_t* mod)
 	strcat(c_source_path, ".c");
 	FILE* c_source = fopen(c_source_path, "w");
 	fprintf(c_source, "%.*s", runtime_c_len, (char*)runtime_c);
+	fputc('\n', c_source);
 	for (symbol_list_t* syms = mod->symbols ; syms ; syms = syms->next)
 	{
 		fprintf(c_source, "SYMBOL $%s = \"%s\";\n", syms->text, syms->text);
 	}
+	if (mod->symbols) fputc('\n', c_source);
 	for (func_list_t* func = mod->funcs ; func ; func = func->next)
 	{
 		size_t num_words = 0;
@@ -707,6 +709,7 @@ void to_c(module_t* mod)
 
 		if (func->func->generic_variant && func->func->generic_variant->used) fprintf(c_source, "BLOCK clone_%s(BLOCK);\n", func->func->name);
 	}
+	fputc('\n', c_source);
 	for (func_list_t* func = mod->funcs ; func ; func = func->next)
 	{
 		size_t num_words = 0;
@@ -1010,6 +1013,7 @@ void to_c(module_t* mod)
 			else fprintf(c_source, "\treturn _%zu;\n", res->id);
 		}
 		fprintf(c_source, "}\n");
+		if (func->next) fputc('\n', c_source);
 	}
 	fclose(c_source);
 }
