@@ -564,6 +564,14 @@ void flatten_ast(module_t* mod)
 
 const char* c_literal(lit_t* literal)
 {
+	if (literal->type == symbol)
+	{
+		char s[strlen(literal->string) + 2];
+		s[0] = '$';
+		s[1] = '\0';
+		strcat(s, literal->string);
+		return strdup(s);
+	}
 	return literal->string; // TODO
 }
 
@@ -667,6 +675,10 @@ void to_c(module_t* mod)
 	strcat(c_source_path, ".c");
 	FILE* c_source = fopen(c_source_path, "w");
 	fprintf(c_source, "%.*s", runtime_c_len, (char*)runtime_c);
+	for (symbol_list_t* syms = mod->symbols ; syms ; syms = syms->next)
+	{
+		fprintf(c_source, "SYMBOL $%s = \"%s\";\n", syms->text, syms->text);
+	}
 	for (func_list_t* func = mod->funcs ; func ; func = func->next)
 	{
 		size_t num_words = 0;
@@ -2503,6 +2515,28 @@ void static_branches(module_t* m)
 	}
 }
 
+void merge_symbols(module_t* m)
+{
+	for (func_list_t* funcs = m->funcs ; funcs ; funcs = funcs->next)
+	{
+		for (ast_list_t* ast = funcs->func->ops ; ast ; ast = ast->next)
+		{
+			if (ast->op->type == literal && ast->op->literal->type == symbol)
+			{
+				for (symbol_list_t* s = m->symbols ; s ; s = s->next)
+				{
+					if (!strcmp(s->text, ast->op->literal->string)) goto next;
+				}
+				symbol_list_t* S = malloc(sizeof *S);
+				S->text = (char*)ast->op->literal->string;
+				S->next = m->symbols;
+				m->symbols = S;
+			}
+next:;
+		}
+	}
+}
+
 int main(int argc, char** argv)
 {
 	(void)argc; (void)argv;
@@ -2531,6 +2565,7 @@ int main(int argc, char** argv)
 	resolve_early_use(m);
 	add_var_types(m);
 	add_typechecks(m);
+	merge_symbols(m);
 	to_c(m);
 	to_exe(m);
 	return EXIT_SUCCESS;
