@@ -1299,7 +1299,12 @@ void _add_registers(func_t* f)
 					if (v->stack)
 					{
 						for (size_t i = registers; i > (size_t)v->argc ; --i)
+						{
+							insert_op_before(make_op(pick, NULL), n);
+							insert_op_before(make_op(push, NULL), n);
+							f->stack = true;
 							registers--;
+						}
 					}
 
 					for (size_t i = 0 ; i < v->argc ; ++i)
