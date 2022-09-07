@@ -1381,6 +1381,15 @@ void _add_registers(func_t* f)
 			case define: case none: case pick: case unpick: break;
 			default: __builtin_trap();
 		}
+		if (!n->next)
+		{
+			for (size_t i = 0 ; i < registers ; ++i)
+			{
+				insert_op_before(make_op(pick, NULL), n);
+				insert_op_before(make_op(push, NULL), n);
+			}
+		}
+
 	}
 	f->has_regs = true;
 }
