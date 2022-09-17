@@ -1497,8 +1497,7 @@ bool add_var_types_backwards(module_t* mod)
 				case var:
 					{
 						val_type_t t = pop_register_front(registers)->type;
-						if (t != any
-								&& op->op->word->val->type != t)
+						if (t != any && op->op->word->val->type != t)
 						{
 							if (op->op->word->val->type != any) __builtin_trap(); // type error
 							op->op->word->val->type = t;
@@ -1580,7 +1579,8 @@ void add_var_types(module_t* mod)
 	{
 		changed = 0;
 		changed |= add_var_types_forwards(mod);
-		changed |= add_var_types_backwards(mod);
+		// Well, the backwards pass is broken again - who'd have guessed?
+		//changed |= add_var_types_backwards(mod);
 	}
 }
 
@@ -2534,12 +2534,14 @@ void balance_branches(module_t* m)
 
 							insert_op_after(make_op(static_call, fns->func), body);
 
+							/*
 							int remaining = fns->func->argc - adaptor->argc;
 							for (int i = 0 ; i < remaining ; ++i)
 							{
-								//insert_op_after(make_op(unpick, NULL), body);
-								//insert_op_after(make_op(pop, NULL), body);
+								insert_op_after(make_op(unpick, NULL), body);
+								insert_op_after(make_op(pop, NULL), body);
 							}
+							*/
 
 							for (val_list_t* v = adaptor->args ; v ; v = v->next)
 							{
@@ -2576,6 +2578,7 @@ int main(int argc, char** argv)
 		merge_symbols,
 		compute_sources,
 		inline_functions,
+		compute_sources,
 		static_branches,
 		compute_sources,
 		static_calls,
