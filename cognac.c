@@ -2635,6 +2635,16 @@ int main(int argc, char** argv)
 	module_t* m = create_module(argv[1]);
 	void(*stages[])(module_t*)
 	= {
+		/*
+		 * TODO
+		 *
+		 * Optimizations should be applied in loops until they stabilise
+		 *
+		 * There should be 1, 2, maybe 3 optimization loops with the (non
+		 * destructive) optimizations in them.
+		 *
+		 * That way we avoid each opt having its own limited loop.
+		 */
 		module_parse,
 		add_backlinks,
 		catch_shadows,
