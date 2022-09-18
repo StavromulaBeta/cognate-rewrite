@@ -2420,6 +2420,7 @@ void static_branches(module_t* m)
 						func_t* f = word_func(a->op->word);
 						for ( size_t i = 0 ; i < f->argc ; ++i )
 							pop_register_front(regs);
+						if (f->stack) clear_registers(regs);
 						if (f->returns)
 							push_register_front(make_register(f->rettype, a), regs);
 						break;
