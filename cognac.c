@@ -60,13 +60,14 @@ where_t* parse_pos()
 _Noreturn void type_error(val_type_t expected, val_type_t got, where_t* pos)
 {
 	char buf[100];
-	sprintf(buf, "expected %s got %s", print_val_type(expected), print_val_type(got));
+	sprintf(buf, "expected %s\ngot %s", print_val_type(expected), print_val_type(got));
 	throw_error(buf, pos);
 }
 
 _Noreturn void throw_error(char* message, where_t* where)
 {
 	// Calculate width of the "[LINE_NUMBER]" bit
+	message = strdup(message);
 	char number_box[64];
 	sprintf(number_box, "[%zu] ", where->line);
 	size_t offset = strlen(number_box) + where->col - 1;
@@ -89,9 +90,23 @@ _Noreturn void throw_error(char* message, where_t* where)
 	// Now print shit
 	fprintf(stderr, "\n\n\033[0;2m%s\033[0;1m%s", number_box, line); // Should have newline already(?)
 	for (int i = 1 ; i < offset ; ++i) fputc(' ', stderr);
-	fprintf(stderr, "\033[31;1m|\\\n");
-	for (int i = 0 ; i < (int)offset - (int)(strlen(message) / 2) ; ++i) fputc(' ', stderr);
-	fprintf(stderr, "%s\033[0m\n\n", message);
+	fprintf(stderr, "\033[31;1m|\\");
+	for (char* p = message + 1; *p != '\n' && *p != '\0' ; p++) fputc('_', stderr);
+	fputc('\n', stderr);
+	for (;;)
+	{
+		char* next = message;
+		for (; *next != '\n' && *next != '\0' ; next++);
+		bool again = *next == '\n';
+		*next = '\0';
+		for (int i = 1 ; i < offset ; ++i) fputc(' ', stderr);
+		fputs("|", stderr);
+		fputs(message, stderr);
+		if (!again) break;
+		fputc('\n', stderr);
+		message = next + 1;
+	}
+	fputs("\033[0m\n\n", stderr);
 	exit(EXIT_FAILURE);
 }
 
@@ -2593,7 +2608,7 @@ void _catch_shadows(ast_list_t* tree)
 			for (word_list_t* w = defined ; w ; w = w->next)
 			{
 				if (!strcmp(w->word->name, a->op->string))
-					throw_error("can't shadow in same block", a->op->where);
+					throw_error("cannot shadow\nin same block", a->op->where);
 			}
 			word_t* W = make_word(a->op->string, a->op->type, NULL);
 			defined = push_word(W, defined);
