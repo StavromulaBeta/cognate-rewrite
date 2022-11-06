@@ -403,7 +403,6 @@ void shorten_references(module_t* mod)
 				default: unreachable();
 				case none:
 				case define:
-				case module_end:
 					break;
 				case pick:
 					push_register_front(pop_register_rear(regs), regs);
@@ -821,16 +820,11 @@ void to_c(module_t* mod)
 		}
 		reg_dequeue_t* registers = make_register_dequeue();
 		reg_t* res = NULL;
-		size_t brace_depth = 0;
 		for (ast_list_t* op = func->func->ops ; op ; op = op->next)
 		{
 			switch (op->op->type)
 			{
 				default: unreachable();
-				case module_end:
-					brace_depth++;
-					fprintf(c_source, "\t{\n");
-					break;
 				case fn_branch:
 					{
 						func_t* v = op->op->funcs->func;
@@ -1044,8 +1038,6 @@ void to_c(module_t* mod)
 		}
 		if (res)
 			fprintf(c_source, "\treturn _%zu;\n", res->id);
-		for (size_t i = 0 ; i < brace_depth ; ++i)
-			fprintf(c_source, "\t}\n");
 		fprintf(c_source, "}\n");
 		if (func->next) fputc('\n', c_source);
 	}
@@ -1184,7 +1176,7 @@ bool _determine_arguments(func_t* f)
 				else if (can_use_args && f->argc < 255 && !f->entry)
 					argc++;
 				break;
-			case define: case none: case pick: case unpick: case module_end: break;
+			case define: case none: case pick: case unpick: break;
 			default: unreachable();
 		}
 		if (!n->next && registers && !f->entry)
@@ -1313,7 +1305,7 @@ bool _determine_registers(func_t* f)
 				if (registers) registers--;
 				else f->stack = true;
 				break;
-			case module_end: case define: case none: case pick: case unpick: break;
+			case define: case none: case pick: case unpick: break;
 			default: unreachable();
 		}
 		if (!n->next && registers)
@@ -1456,7 +1448,7 @@ void _add_registers(func_t* f)
 					f->stack = true;
 				}
 				break;
-			case module_end: case define: case none: case pick: case unpick: break;
+			case define: case none: case pick: case unpick: break;
 			default: unreachable();
 		}
 		if (!n->next)
@@ -1707,7 +1699,6 @@ bool add_var_types_backwards(module_t* mod)
 					break;
 				case none:
 				case define:
-				case module_end:
 					break;
 				default: unreachable();
 			}
@@ -1912,7 +1903,6 @@ void add_typechecks(module_t* mod)
 					}
 				case none: break;
 				case define: break;
-				case module_end: break;
 				default: unreachable();
 			}
 		}
@@ -2091,7 +2081,6 @@ void _compute_sources(ast_list_t* a)
 				break;
 			case none:
 			case define:
-			case module_end:
 				break;
 			default: unreachable();
 		}
@@ -2507,7 +2496,6 @@ void static_branches(module_t* m)
 				default: unreachable();
 				case none:
 				case define:
-				case module_end:
 					break;
 				case pick:
 					push_register_front(pop_register_rear(regs), regs);
@@ -2626,7 +2614,6 @@ void _catch_shadows(ast_list_t* tree)
 			defined = push_word(W, defined);
 		}
 		else if (a->op->type == braces) _catch_shadows(a->op->child);
-		else if (a->op->type == module_end) defined = NULL;
 	}
 }
 
@@ -2805,7 +2792,8 @@ void demodulize(module_t* m)
 	for (module_list_t* mm = m->uses ; mm ; mm = mm->next)
 	{
 		demodulize(mm->mod);
-		ast_list_t* ptr = m->tree;
+		ast_list_t* ptr = make_astlist();
+		ast_list_t* ptr_start = ptr;
 		for (ast_list_t* tree = mm->mod->tree ; tree ; tree = tree->next)
 		{
 			if (tree->op->type != none)
@@ -2814,7 +2802,17 @@ void demodulize(module_t* m)
 				ptr = ptr->next;
 			}
 		}
-		insert_op_after(make_op(module_end, NULL, NULL), ptr);
+		// We make a function call that will hopefully be inlined later.
+		insert_op_after(make_op(braces, m->tree, NULL), ptr);
+		ptr=ptr->next;
+		static size_t id = 0;
+		char fn[20];
+		sprintf(fn, "not a real function %zi", id);
+		char* s = strdup(fn);
+		insert_op_after(make_op(def, s, NULL), ptr);
+		ptr=ptr->next;
+		insert_op_after(make_op(identifier, s, NULL), ptr);
+		m->tree = ptr_start;
 	}
 }
 

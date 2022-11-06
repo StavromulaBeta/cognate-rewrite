@@ -34,7 +34,6 @@ typedef enum _type_t
 	// Both
 	literal,
 	// IR specific
-	module_end,
 	closure, // FUNC
 	var, // WORD
 	call, // WORD
