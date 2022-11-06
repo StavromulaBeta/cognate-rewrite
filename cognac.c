@@ -2807,7 +2807,7 @@ void demodulize(module_t* m)
 		ptr=ptr->next;
 		static size_t id = 0;
 		char fn[20];
-		sprintf(fn, "not a real function %zi", id);
+		sprintf(fn, "module_%zi", id);
 		char* s = strdup(fn);
 		insert_op_after(make_op(def, s, NULL), ptr);
 		ptr=ptr->next;
