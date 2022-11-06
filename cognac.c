@@ -403,6 +403,7 @@ void shorten_references(module_t* mod)
 				default: unreachable();
 				case none:
 				case define:
+				case module_end:
 					break;
 				case pick:
 					push_register_front(pop_register_rear(regs), regs);
@@ -820,11 +821,16 @@ void to_c(module_t* mod)
 		}
 		reg_dequeue_t* registers = make_register_dequeue();
 		reg_t* res = NULL;
+		size_t brace_depth = 0;
 		for (ast_list_t* op = func->func->ops ; op ; op = op->next)
 		{
 			switch (op->op->type)
 			{
 				default: unreachable();
+				case module_end:
+					brace_depth++;
+					fprintf(c_source, "\t{\n");
+					break;
 				case fn_branch:
 					{
 						func_t* v = op->op->funcs->func;
@@ -1038,6 +1044,8 @@ void to_c(module_t* mod)
 		}
 		if (res)
 			fprintf(c_source, "\treturn _%zu;\n", res->id);
+		for (size_t i = 0 ; i < brace_depth ; ++i)
+			fprintf(c_source, "\t}\n");
 		fprintf(c_source, "}\n");
 		if (func->next) fputc('\n', c_source);
 	}
@@ -1176,7 +1184,7 @@ bool _determine_arguments(func_t* f)
 				else if (can_use_args && f->argc < 255 && !f->entry)
 					argc++;
 				break;
-			case define: case none: case pick: case unpick: break;
+			case define: case none: case pick: case unpick: case module_end: break;
 			default: unreachable();
 		}
 		if (!n->next && registers && !f->entry)
@@ -1305,7 +1313,7 @@ bool _determine_registers(func_t* f)
 				if (registers) registers--;
 				else f->stack = true;
 				break;
-			case define: case none: case pick: case unpick: break;
+			case module_end: case define: case none: case pick: case unpick: break;
 			default: unreachable();
 		}
 		if (!n->next && registers)
@@ -1448,7 +1456,7 @@ void _add_registers(func_t* f)
 					f->stack = true;
 				}
 				break;
-			case define: case none: case pick: case unpick: break;
+			case module_end: case define: case none: case pick: case unpick: break;
 			default: unreachable();
 		}
 		if (!n->next)
@@ -1699,6 +1707,7 @@ bool add_var_types_backwards(module_t* mod)
 					break;
 				case none:
 				case define:
+				case module_end:
 					break;
 				default: unreachable();
 			}
@@ -1903,6 +1912,7 @@ void add_typechecks(module_t* mod)
 					}
 				case none: break;
 				case define: break;
+				case module_end: break;
 				default: unreachable();
 			}
 		}
@@ -2081,6 +2091,7 @@ void _compute_sources(ast_list_t* a)
 				break;
 			case none:
 			case define:
+			case module_end:
 				break;
 			default: unreachable();
 		}
@@ -2496,6 +2507,7 @@ void static_branches(module_t* m)
 				default: unreachable();
 				case none:
 				case define:
+				case module_end:
 					break;
 				case pick:
 					push_register_front(pop_register_rear(regs), regs);
@@ -2614,6 +2626,7 @@ void _catch_shadows(ast_list_t* tree)
 			defined = push_word(W, defined);
 		}
 		else if (a->op->type == braces) _catch_shadows(a->op->child);
+		else if (a->op->type == module_end) defined = NULL;
 	}
 }
 
@@ -2765,6 +2778,46 @@ end:;
 
 void end(module_t* m) { exit(EXIT_SUCCESS); }
 
+void compute_modules(module_t* m)
+{
+	for (ast_list_t* a = m->tree ; a ; a = a->next)
+	{
+		if (a->op->type == use)
+		{
+			char* filename = alloc(strlen(a->op->string) + 5);
+			*filename = '\0';
+			strcpy(filename, a->op->string);
+			strcat(filename, ".cog");
+			module_list_t* M = alloc(sizeof *M);
+			M->mod = create_module(filename);
+			M->next = m->uses;
+			m->uses = M;
+			remove_op(a);
+			module_parse(M->mod);
+			add_backlinks(M->mod);
+			compute_modules(M->mod); // TODO catch mutually recursive imports.
+		}
+	}
+}
+
+void demodulize(module_t* m)
+{
+	for (module_list_t* mm = m->uses ; mm ; mm = mm->next)
+	{
+		demodulize(mm->mod);
+		ast_list_t* ptr = m->tree;
+		for (ast_list_t* tree = mm->mod->tree ; tree ; tree = tree->next)
+		{
+			if (tree->op->type != none)
+			{
+				insert_op_after(tree->op, ptr);
+				ptr = ptr->next;
+			}
+		}
+		insert_op_after(make_op(module_end, NULL, NULL), ptr);
+	}
+}
+
 int main(int argc, char** argv)
 {
 	long system_memory = sysconf(_SC_PHYS_PAGES) * 4096;
@@ -2786,6 +2839,8 @@ int main(int argc, char** argv)
 		 */
 		module_parse,
 		add_backlinks,
+		compute_modules,
+		demodulize,
 		catch_shadows,
 		predeclare,
 		resolve_scope,

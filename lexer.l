@@ -32,7 +32,7 @@ FORMAL    [A-Z\-\?\!\+\/\*\>\<\=\^]
 %%
 D[eE][fF] return DEF;
 L[eE][tT] return LET;
-T[yY][pP][eE] return TYPE;
+U[sS][eE] return USE;
 
 \-?[0-9]+(\.[0-9]+)? yylval.text=strdup(yytext);       return NUMBER;
 {FORMAL}{ALLOWCHAR}* yylval.text=lc(strdup(yytext));   return IDENTIFIER;

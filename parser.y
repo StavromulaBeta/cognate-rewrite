@@ -14,7 +14,7 @@
 	<text> IDENTIFIER
 	<text> STRING
 	<text> SYMBOL
-	TYPE
+	USE
 	DEF
 	LET
 	';'
@@ -51,6 +51,7 @@ TOKEN:
 	| SYMBOL             { $$ = ast_single(literal, mk_lit(symbol, $1), parse_pos()); }
 	| DEF IDENTIFIER     { $$ = ast_single(def, (void*)lowercase($2), parse_pos()); }
 	| LET IDENTIFIER     { $$ = ast_single(let, (void*)lowercase($2), parse_pos()); }
+	| USE IDENTIFIER     { $$ = ast_single(use, (void*)lowercase($2), parse_pos()); }
 	;
 
 %%

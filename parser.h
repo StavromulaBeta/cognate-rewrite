@@ -58,7 +58,7 @@ extern int yydebug;
     IDENTIFIER = 259,              /* IDENTIFIER  */
     STRING = 260,                  /* STRING  */
     SYMBOL = 261,                  /* SYMBOL  */
-    TYPE = 262,                    /* TYPE  */
+    USE = 262,                     /* USE  */
     DEF = 263,                     /* DEF  */
     LET = 264                      /* LET  */
   };
