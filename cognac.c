@@ -2765,9 +2765,9 @@ end:;
 
 void end(module_t* m) { exit(EXIT_SUCCESS); }
 
-void compute_modules(module_t* m)
+void _compute_modules(ast_list_t* A, module_t* m)
 {
-	for (ast_list_t* a = m->tree ; a ; a = a->next)
+	for (ast_list_t* a = A ; a ; a = a->next)
 	{
 		if (a->op->type == use)
 		{
@@ -2782,9 +2782,15 @@ void compute_modules(module_t* m)
 			remove_op(a);
 			module_parse(M->mod);
 			add_backlinks(M->mod);
-			compute_modules(M->mod); // TODO catch mutually recursive imports.
+			_compute_modules(M->mod->tree, M->mod); // TODO catch mutually recursive imports.
 		}
+		if (a->op->type == braces) _compute_modules(a->op->child, m);
 	}
+}
+
+void compute_modules(module_t* m)
+{
+	_compute_modules(m->tree, m);
 }
 
 void demodulize(module_t* m)
