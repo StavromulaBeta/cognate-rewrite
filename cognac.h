@@ -31,6 +31,7 @@ typedef enum _type_t
 	use, // STRING
 	braces, // CHILD
 	identifier, // STRING
+	module_identifier, // STRING
 	// Both
 	literal,
 	// IR specific
@@ -131,6 +132,7 @@ struct _word_t
 {
 	char* name;
 	size_t shadow_id;
+	module_t* mod;
 	type_t calltype;
 	val_t* val;
 	bool used_early;
@@ -156,6 +158,7 @@ struct _ast_t
 		word_t* word;
 		lit_t* literal;
 		ast_list_t* child;
+		module_t* mod;
 		val_type_t val_type;
 	};
 	where_t* where;
