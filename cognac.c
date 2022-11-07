@@ -721,9 +721,9 @@ void to_exe(module_t* mod)
 	char* args[] =
 	{
 		"gcc", c_source_path, "-o", exe_path,
-		"-Ofast", "-flto", //"-Wno-unused", "-Wall", "-Wextra", "-Wpedantic",
+		"-Ofast", "-flto", "-s",
 		//"-Og", "-ggdb3", "-g",
-		"-std=gnu11", "-lm", NULL
+		"-lm", NULL
 	};
 	pid_t p = fork();
 	if (!p) execvp(args[0], args);
@@ -2581,12 +2581,12 @@ void static_branches(module_t* m)
 											NULL));
 							ast_list_t* op = make_astlist();
 							word_t* b = make_word("", var, NULL, NULL);
-							insert_op_after(make_op(fn_branch, fl, op->op->where), op);
-							insert_op_after(make_op(var, b, op->op->where), op);
+							insert_op_after(make_op(fn_branch, fl, a->op->where), op);
+							insert_op_after(make_op(var, b, a->op->where), op);
 							func_t* F = make_func(op, make_func_name());
-							a->op = make_op(closure, F, op->op->where);
-							insert_op_before(make_op(define, b, op->op->where), a);
-							insert_op_before(make_op(bind, b, op->op->where), a);
+							a->op = make_op(closure, F, a->op->where);
+							insert_op_before(make_op(define, b, a->op->where), a);
+							insert_op_before(make_op(bind, b, a->op->where), a);
 							b->val = make_value(any, a->prev);
 							m->funcs = push_func(F, m->funcs);
 							remove_op(i1->source);
