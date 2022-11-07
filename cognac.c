@@ -15,6 +15,7 @@
 ast_list_t* full_ast = NULL;
 module_t* pmod = NULL;
 char* heap = NULL;
+module_t prelude = { .prefix = "prelude" };
 
 static void unreachable()
 {
@@ -73,7 +74,9 @@ _Noreturn void throw_error(char* message, where_t* where)
 	size_t offset = strlen(number_box) + where->col - 1;
 
 	// Ok now we need to actually get the line
-	rewind(where->mod->file);
+	fclose(where->mod->file);
+	where->mod->file = fopen(where->mod->path, "r");
+	printf("%zi lines\n1", where->line);
 	while (--where->line)
 	{
 		char c;
@@ -360,6 +363,8 @@ void module_parse(module_t* mod)
 	assert(!strcmp(mod->path + strlen(mod->path) - 4, ".cog"));
 	pmod = mod;
 	yyin = mod->file; // imagine having a reentrant parser.
+	yylloc.first_line = 1;
+	yylloc.first_column = 1;
 	yyparse();
 	mod->tree = full_ast;
 }
@@ -527,8 +532,11 @@ void _resolve_scope(ast_list_t* tree, word_list_t* words, module_t* m)
 			case identifier:;
 				word_list_t* w = words;
 				for (; w ; w = w->next)
-					if (!strcmp(w->word->name, node->op->string) && (w->word->mod == m || !w->word->mod))
+				{
+					printf("%s == %s, %s == %s\n", w->word->name, node->op->string, w->word->mod->prefix, node->op->where->mod->prefix);
+					if (!strcmp(w->word->name, node->op->string) && (w->word->mod == node->op->where->mod || w->word->mod == &prelude))
 						break;
+				}
 				if (!w) throw_error("undefined word", node->op->where);
 				node->op->type = w->word->calltype;
 				node->op->word = w->word;
@@ -2967,14 +2975,13 @@ word_list_t* builtins()
 		fn->branch = false;
 		fn->unique = false;
 		fn->has_args = true;
-		module_t* prelude = NULL; // TODO
 		type_t calltype = b[i].calltype;
 		for (int ii = b[i].argc-1 ; ii >= 0 ; --ii)
 			fn->args = push_val(make_value(b[i].args[ii], NULL), fn->args);
 		words = push_word(
 				make_word(b[i].name, calltype,
 					make_value(block,
-						ast_single(closure, fn, NULL)), prelude), words); // TODO prelude module source.
+						ast_single(closure, fn, NULL)), &prelude), words); // TODO prelude module source.
 	}
 	return words;
 }
