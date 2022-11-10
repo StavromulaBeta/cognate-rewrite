@@ -13,6 +13,9 @@
 #include <sys/wait.h>
 #include <execinfo.h>
 
+#define STRING_(x) #x
+#define STRING(x) STRING_(x)
+
 ast_list_t* full_ast = NULL;
 module_t* pmod = NULL;
 char* heap = NULL;
@@ -724,8 +727,8 @@ void to_exe(module_t* mod)
 
 	char* args[] =
 	{
-		"gcc", c_source_path, "-o", exe_path,
-		"-Ofast", "-flto", "-s",
+		STRING(CC), c_source_path, "-o", exe_path,
+		"-Ofast", "-flto", "-s", "-w",
 		//"-Og", "-ggdb3", "-g",
 		"-lm", NULL
 	};
