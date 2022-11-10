@@ -1751,7 +1751,7 @@ bool add_var_types_backwards(module_t* mod)
 			val_type_t t = args->val->type;
 			if (t != any && v->val->type != t && !func->func->branch)
 			{
-				if (v->val->type != any) type_error(v->val->type, t, NULL); // TODO position info
+				if (v->val->type != any) type_error(v->val->type, t, op->op->where);
 				v->val->type = t;
 				changed = 1;
 			}
@@ -2557,17 +2557,6 @@ void static_branches(module_t* m)
 					break;
 				case branch:
 					{
-						/* TODO
-						 *
-						 * Ok what's the problem here?
-						 *
-						 * Essentially, this optimization replaces If Cond () else ()
-						 * With a single closure that pops the boolean and dispatches
-						 * In the Do If case this works great, but not all blocks passed
-						 * to If are evaluated immediately - hence the issue. Shouldn't
-						 * be *too* difficult to fix probably hopefully fingers crossed.
-						 */
-
 						pop_register_front(regs); // bool
 						reg_t* i1 = pop_register_front(regs);
 						reg_t* i2 = pop_register_front(regs);
@@ -2707,22 +2696,6 @@ void balance_branches(module_t* m)
 						val_list_t* adapt_args = NULL;
 						for (int i = 0 ; i < min_argc ; ++i)
 							adapt_args = push_val(make_value(any, NULL), adapt_args);
-
-						/*
-						 * TODO
-						 * We can optimize Do If X then () else (+ 1) 12;
-						 * we just need to change () into the identity functions
-						 * that way the runtime stack is not needed.
-						 *
-						 * Counterpoint:
-						 *
-						 * 	Do If True () else (Print);
-						 *
-						 * is a valid program but will not run with the above
-						 * optimization.
-						 * TODO
-						 */
-
 						// generate adaptor functions.
 						for (func_list_t* fns = op->funcs ; fns ; fns = fns->next)
 						{
