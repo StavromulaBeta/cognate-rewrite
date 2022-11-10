@@ -56,7 +56,7 @@ static void unreachable()
 	int bt_sz = backtrace(bt, 128);
 	backtrace_symbols_fd(bt, bt_sz, STDERR_FILENO);
 	write(STDERR_FILENO, "\033[0m\n\n", sizeof("\033[0m\n\n"));
-	__builtin_trap();
+	abort();
 }
 
 static void* alloc(size_t n)

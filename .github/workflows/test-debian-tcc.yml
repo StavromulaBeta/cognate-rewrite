@@ -1,4 +1,4 @@
-name: Debian
+name: Debian (tcc)
 on:
   push:
     branches: [ master ]
@@ -14,9 +14,9 @@ jobs:
       - name: Aquire dependencies and compile
         shell: bash
         run: |
-          sudo apt install flex bison gcc -y
+          sudo apt install flex bison tcc -y
           cd $GITHUB_WORKSPACE
-          make
+          make CC=tcc
       - name: Run test script
         shell: bash
         run: |
@@ -26,5 +26,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v2
         with:
-          name: tests-debian
+          name: tests-debian-tcc
           path: tests/*.*
