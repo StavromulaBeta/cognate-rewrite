@@ -2049,4 +2049,32 @@ static void ___close(IO io)
 	fclose(io->file);
 	io->file = NULL;
 }
+
+static BOOLEAN ___openQ(IO io)
+{
+	return (BOOLEAN)io->file;
+}
+
+static STRING ___fileDname(IO io)
+{
+	return io->path;
+}
+
+static STRING ___fileDmode(IO io)
+{
+	return io->mode; // TODO symbol
+}
+
+static void ___write(STRING s, IO io)
+{
+	fputs(s, io->file);
+}
+
+static void ___seek(NUMBER n, IO io)
+{
+	size_t p = n;
+	if unlikely(p != n) throw_error_fmt("cannot seek to position %.14g", n);
+	fseek(io->file, p, SEEK_CUR);
+}
+
 // ---------- ACTUAL PROGRAM ----------
