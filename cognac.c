@@ -1410,10 +1410,12 @@ void _add_registers(func_t* f)
 					for (func_list_t* f = op->funcs ; f ; f = f->next)
 				   	_add_registers(f->func);
 
+					/*
 					for (func_list_t* f = op->funcs ; f ; f = f->next)
 						if (f->func->stack)
 							for (func_list_t* f = op->funcs ; f ; f = f->next)
 								f->func->stack = true;
+								*/
 
 					if (v->stack)
 					{
@@ -1501,12 +1503,15 @@ void _add_registers(func_t* f)
 		}
 		if (!n->next)
 		{
-			for (size_t i = 0 ; i < registers ; ++i)
+			if (registers)
 			{
-				insert_op_before(make_op(pick, NULL, op->where), n);
-				insert_op_before(make_op(push, NULL, op->where), n);
+				for (size_t i = 0 ; i < registers ; ++i)
+				{
+					insert_op_before(make_op(pick, NULL, op->where), n);
+					insert_op_before(make_op(push, NULL, op->where), n);
+				}
+				f->stack = true;
 			}
-			f->stack = true;
 		}
 	}
 }
@@ -2913,7 +2918,7 @@ int main(int argc, char** argv)
 		merge_symbols,
 		compute_stack,
 		compute_sources,
-		inline_functions,
+		inline_functions, // TODO things break without this
 		compute_sources,
 		static_branches,
 		compute_sources,
@@ -2924,7 +2929,7 @@ int main(int argc, char** argv)
 		add_generics,
 		balance_branches,
 		compute_stack,
-		determine_registers,
+		//determine_registers,
 		add_registers,
 		compute_stack,
 		shorten_references,
