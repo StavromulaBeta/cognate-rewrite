@@ -2088,7 +2088,7 @@ static void oh_no(void* env[1])
 	longjmp(*(jmp_buf*)env[0], 1);
 }
 
-static void ___go(BLOCK f)
+static void ___begin(BLOCK f)
 {
 	jmp_buf b;
 	if (!setjmp(b))
