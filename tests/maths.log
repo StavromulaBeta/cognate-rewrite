@@ -1,0 +1,19 @@
+	   ______                        ______
+	  / ____/___  ____ _____  ____ _/ ____/
+	 / /   / __ \/ __ `/ __ \/ __ `/ /
+	/ /___/ /_/ / /_/ / / / / /_/ / /___
+	\____/\____/\__, /_/ /_/\__,_/\____/
+	           /____/
+	                  Cognate Compiler
+
+tests/maths.cog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tests/maths
+PASS: Addition
+PASS: Subtraction
+PASS: Multiplication
+PASS: Division
+PASS: Modulus
+PASS: Floor
+PASS: Ceiling
+PASS: Round
+PASS: Floating point error
+PASS: Floating point error 2

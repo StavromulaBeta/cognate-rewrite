@@ -1,0 +1,12 @@
+	   ______                        ______
+	  / ____/___  ____ _____  ____ _/ ____/
+	 / /   / __ \/ __ `/ __ \/ __ `/ /
+	/ /___/ /_/ / /_/ / / / / /_/ / /___
+	\____/\____/\__, /_/ /_/\__,_/\____/
+	           /____/
+	                  Cognate Compiler
+
+tests/map.cog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tests/map
+PASS: Mapping over a list
+PASS: Mapping over an empty list
+PASS: Mapping in order

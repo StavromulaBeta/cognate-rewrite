@@ -248,9 +248,9 @@ static NUMBER ___random(NUMBER, NUMBER);
 static void ___clear(void);
 static BOOLEAN ___true(void);
 static BOOLEAN ___false(void);
-static BOOLEAN ___either(BOOLEAN, BOOLEAN);
-static BOOLEAN ___both(BOOLEAN, BOOLEAN);
-static BOOLEAN ___oneDof(BOOLEAN, BOOLEAN);
+static BOOLEAN ___or(BOOLEAN, BOOLEAN);
+static BOOLEAN ___and(BOOLEAN, BOOLEAN);
+static BOOLEAN ___xor(BOOLEAN, BOOLEAN);
 static BOOLEAN ___not(BOOLEAN);
 static BOOLEAN ___EE(ANY, ANY);
 static BOOLEAN ___XE(ANY, ANY);
@@ -276,7 +276,7 @@ static STRING ___tail(STRING);
 static LIST ___push(ANY, LIST);
 static BOOLEAN ___emptyQ(LIST);
 static LIST ___list(BLOCK);
-static STRING ___join(NUMBER);
+static STRING ___join(STRING, STRING);
 static NUMBER ___stringDlength(STRING);
 static STRING ___substring(NUMBER, NUMBER, STRING);
 static STRING ___input(void);
@@ -389,7 +389,7 @@ int main(int argc, char** argv)
 		cmdline_parameters = tmp;
 	}
 	// Bind error signals.
-	char signals[] = { SIGHUP, SIGSEGV, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGBUS, SIGFPE, SIGPIPE, SIGTERM, SIGCHLD };
+	char signals[] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGBUS, SIGFPE, SIGPIPE, SIGTERM, SIGCHLD };
 	for (size_t i = 0; i < sizeof(signals); ++i) signal(signals[i], handle_error_signal);
 	// Initialize the stack.
 	init_stack();
@@ -1238,9 +1238,9 @@ static void ___clear(void) { stack.cache.type = NIL; stack.top=stack.start; }
 
 static BOOLEAN ___true(void)  { return 1; }
 static BOOLEAN ___false(void) { return 0; }
-static BOOLEAN ___either(BOOLEAN a, BOOLEAN b) { return a || b; }
-static BOOLEAN ___both(BOOLEAN a, BOOLEAN b)   { return a && b; }
-static BOOLEAN ___oneDof(BOOLEAN a, BOOLEAN b) { return a ^ b;  }
+static BOOLEAN ___or(BOOLEAN a, BOOLEAN b) { return a || b; }
+static BOOLEAN ___and(BOOLEAN a, BOOLEAN b)   { return a && b; }
+static BOOLEAN ___xor(BOOLEAN a, BOOLEAN b) { return a ^ b;  }
 static BOOLEAN ___not(BOOLEAN a)               { return !a;     }
 static BOOLEAN ___EE(ANY a, ANY b)  { return compare_objects(a,b); }
 static BOOLEAN ___XE(ANY a, ANY b) { return !compare_objects(a,b); }
@@ -1394,27 +1394,14 @@ static LIST ___list(BLOCK expr)
 	return lst;
 }
 
-static STRING ___join(NUMBER n)
+static STRING ___join(STRING s1, STRING s2)
 {
-	// Joins a string to the end of another string.
-	// Define Prefix (Swap, Suffix);
-	size_t n1 = n;
-	if (n != n1) throw_error_fmt("Cannot join %.14g strings", n);
-	const char* strings[n1];
-	size_t result_size = 1;
-	for (size_t i = 0; i < n1; ++i)
-	{
-		const char* str = unbox_STRING(pop());
-		strings[i] = str;
-		result_size += strlen(str);
-	}
-	char* const result = gc_flatmalloc(result_size);
-	result[0] = '\0';
-	for (size_t i = 0; i < n1; ++i)
-	{
-		strcat(result, strings[i]);
-	}
-	return result;
+	size_t l1 = strlen(s1);
+	size_t l2 = strlen(s2);
+	char* result = gc_malloc(l1 + l2 + 1);
+	strcpy(result, s1);
+	strcpy(result+l1, s2);
+ 	return result;
 }
 
 static NUMBER ___stringDlength(STRING str)
@@ -1879,14 +1866,6 @@ static void ___set(BOX b, ANY a)
 	*b = a;
 }
 
-static void ___debug()
-{
-#ifdef DEBUG
-	debug = 1;
-	debugger_step();
-#endif
-}
-
 /* math */
 
 #ifndef M_PI
@@ -2103,3 +2082,195 @@ static void ___begin(BLOCK f)
 }
 
 // ---------- ACTUAL PROGRAM ----------
+
+void fn55(void* env[0]);
+void fn43(void* env[0]);
+void fn42(void* env[0]);
+void fn41(void* env[0]);
+void fn40(void* env[0]);
+void fn39(void* env[0]);
+void fn37(void* env[0]);
+void fn36(void* env[0]);
+void fn35(void* env[0]);
+void fn34(void* env[0]);
+void fn32(void* env[0]);
+void fn31(void);
+void fn29(BLOCK);
+void fn28(void);
+void fn27(void);
+void fn26(void);
+void fn24(BLOCK);
+void fn23(void);
+void fn22(BLOCK);
+void fn21(BLOCK);
+void fn20(void);
+void fn8(void);
+void fn0(void);
+
+void fn55(void* env[0]) {
+	fn8();
+}
+
+void fn43(void* env[0]) {
+	fn20();
+}
+
+void fn42(void* env[0]) {
+	BLOCK ___y_165 = *(BLOCK*)&env[0];
+	fn21(___y_165);
+}
+
+void fn41(void* env[0]) {
+	BLOCK ___z_166 = *(BLOCK*)&env[0];
+	fn22(___z_166);
+}
+
+void fn40(void* env[0]) {
+	fn23();
+}
+
+void fn39(void* env[0]) {
+	BLOCK ___y_168 = *(BLOCK*)&env[0];
+	fn24(___y_168);
+}
+
+void fn37(void* env[0]) {
+	fn26();
+}
+
+void fn36(void* env[0]) {
+	fn27();
+}
+
+void fn35(void* env[0]) {
+	fn28();
+}
+
+void fn34(void* env[0]) {
+	BLOCK ___foo_174 = *(BLOCK*)&env[0];
+	fn29(___foo_174);
+}
+
+void fn32(void* env[0]) {
+	fn31();
+}
+
+void fn31(void) {
+	STRING _1021 = "PASS: Another block copying test again";
+	ANY _1022 = box_STRING(_1021);
+	___print(_1022);
+}
+
+void fn29(BLOCK ___foo_174) {
+	BLOCK _1023 = ___foo_174;
+	___do(_1023);
+}
+
+void fn28(void) {
+	STRING _1024 = "PASS: Another block copying test";
+	ANY _1025 = box_STRING(_1024);
+	___print(_1025);
+}
+
+void fn27(void) {
+	STRING _1026 = "FAIL: Implicit block copying with mutation";
+	ANY _1027 = box_STRING(_1026);
+	___print(_1027);
+}
+
+void fn26(void) {
+	STRING _1028 = "PASS: Implicit block copying with mutation";
+	ANY _1029 = box_STRING(_1028);
+	___print(_1029);
+}
+
+void fn24(BLOCK ___y_168) {
+	BLOCK _1030 = ___y_168;
+	___do(_1030);
+}
+
+void fn23(void) {
+	STRING _1031 = "FAIL: Implicit block copying";
+	ANY _1032 = box_STRING(_1031);
+	___print(_1032);
+}
+
+void fn22(BLOCK ___z_166) {
+	BLOCK _1033 = ___z_166;
+	___do(_1033);
+}
+
+void fn21(BLOCK ___y_165) {
+	BLOCK _1034 = ___y_165;
+	___do(_1034);
+}
+
+void fn20(void) {
+	STRING _1035 = "PASS: Implicit block copying";
+	ANY _1036 = box_STRING(_1035);
+	___print(_1036);
+}
+
+void fn8(void) {
+}
+
+void fn0(void) {
+	BLOCK ___foo_174;
+	BLOCK ___z_169;
+	BLOCK ___y_168;
+	BLOCK ___z_166;
+	BLOCK ___y_165;
+	BOX ___y_28;
+	BLOCK ___z_31;
+	BLOCK _1037 = gc_malloc(3 * WORDSZ);
+	_1037->fn = fn43;
+	___y_165 = _1037;
+	BLOCK _1038 = gc_malloc(4 * WORDSZ);
+	_1038->fn = fn42;
+	_1038->env[0] = *(void**)&___y_165;
+	___z_166 = _1038;
+	BLOCK _1039 = gc_malloc(4 * WORDSZ);
+	_1039->fn = fn41;
+	_1039->env[0] = *(void**)&___z_166;
+	BLOCK _1040 = gc_malloc(3 * WORDSZ);
+	_1040->fn = fn40;
+	___y_168 = _1040;
+	BLOCK _1041 = gc_malloc(4 * WORDSZ);
+	_1041->fn = fn39;
+	_1041->env[0] = *(void**)&___y_168;
+	___z_169 = _1041;
+	___do(_1039);
+	BLOCK _1042 = gc_malloc(3 * WORDSZ);
+	_1042->fn = fn55;
+	ANY _1043 = box_BLOCK(_1042);
+	BOX _1044 = ___box(_1043);
+	___y_28 = _1044;
+	BLOCK _1045 = gc_malloc(3 * WORDSZ);
+	_1045->fn = fn37;
+	BOX _1046 = ___y_28;
+	ANY _1047 = box_BLOCK(_1045);
+	___set(_1046, _1047);
+	BOX _1048 = ___y_28;
+	ANY _1049 = ___unbox(_1048);
+	BLOCK _1050 = unbox_BLOCK(_1049);
+	___z_31 = _1050;
+	BLOCK _1051 = gc_malloc(3 * WORDSZ);
+	_1051->fn = fn36;
+	BOX _1052 = ___y_28;
+	ANY _1053 = box_BLOCK(_1051);
+	___set(_1052, _1053);
+	BOX _1054 = ___y_28;
+	ANY _1055 = ___unbox(_1054);
+	BLOCK _1056 = ___z_31;
+	___do(_1056);
+	BLOCK _1057 = gc_malloc(3 * WORDSZ);
+	_1057->fn = fn35;
+	___foo_174 = _1057;
+	BLOCK _1058 = gc_malloc(4 * WORDSZ);
+	_1058->fn = fn34;
+	_1058->env[0] = *(void**)&___foo_174;
+	___do(_1058);
+	BLOCK _1059 = gc_malloc(3 * WORDSZ);
+	_1059->fn = fn32;
+	___do(_1059);
+}

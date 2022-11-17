@@ -1,0 +1,18 @@
+	   ______                        ______
+	  / ____/___  ____ _____  ____ _/ ____/
+	 / /   / __ \/ __ `/ __ \/ __ `/ /
+	/ /___/ /_/ / /_/ / / / / /_/ / /___
+	\____/\____/\__, /_/ /_/\__,_/\____/
+	           /____/
+	                  Cognate Compiler
+
+tests/strings.cog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tests/strings
+PASS: Converting list of strings to combined string
+PASS: Converting string to UTF8 value with Ordinal
+PASS: Converting UTF8 value to string
+PASS: Casting strings to numbers
+PASS: Getting Head of string
+PASS: Getting Head of single-character string
+PASS: Getting Tail of string
+PASS: Getting Tail of single-character string
+PASS: Splitting a string

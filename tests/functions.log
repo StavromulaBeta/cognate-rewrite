@@ -1,0 +1,14 @@
+	   ______                        ______
+	  / ____/___  ____ _____  ____ _/ ____/
+	 / /   / __ \/ __ `/ __ \/ __ `/ /
+	/ /___/ /_/ / /_/ / / / / /_/ / /___
+	\____/\____/\__, /_/ /_/\__,_/\____/
+	           /____/
+	                  Cognate Compiler
+
+tests/functions.cog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tests/functions
+PASS: Function call and return
+PASS: Function shadowing 1
+PASS: Function shadowing 2
+PASS: Recursion
+PASS: Binary recursion

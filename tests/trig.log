@@ -1,0 +1,27 @@
+	   ______                        ______
+	  / ____/___  ____ _____  ____ _/ ____/
+	 / /   / __ \/ __ `/ __ \/ __ `/ /
+	/ /___/ /_/ / /_/ / / / / /_/ / /___
+	\____/\____/\__, /_/ /_/\__,_/\____/
+	           /____/
+	                  Cognate Compiler
+
+tests/trig.cog >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tests/trig
+PASS: Degree sin
+PASS: Degree cos
+PASS: Degree tan
+PASS: Radian sin
+PASS: Radian cos
+PASS: Radian tan
+PASS: Degree arcsin
+PASS: Degree arccos
+PASS: Degree arctan
+PASS: Radian arcsin
+PASS: Radian arccos
+PASS: Radian arctan
+PASS: Degree hyperbolic sin
+PASS: Degree hyperbolic cos
+PASS: Degree hyperbolic tan
+PASS: Radian hyperbolic sin
+PASS: Radian hyperbolic cos
+PASS: Radian hyperbolic tan
